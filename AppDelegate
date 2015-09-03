@@ -1,0 +1,121 @@
+mport UIKit
+
+
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    var window: UIWindow?
+
+
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        
+        // Checks NSUserDefaults to see if user has launched app before.
+        if(NSUserDefaults.standardUserDefaults().boolForKey("HasLaunchedOnce")) {
+            
+            
+        // if "HasLaunchedOnce" -> Go to FeedViewController.
+            self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
+            
+            var storyboard = UIStoryboard(name: "Main", bundle: nil)
+            
+            var initialViewController = storyboard.instantiateViewControllerWithIdentifier("MainFeed") as! UIViewController
+            
+            self.window?.rootViewController = initialViewController
+            self.window?.makeKeyAndVisible()
+            
+            return true
+        
+        } else {
+            
+        // This is the request to generate an anonymous authID. It is then saved on the phone via NSUserDefaults.
+            
+            let genAnonUrl = NSURL(string: "http://www.yourbackendserver.com:genAnon")
+            let genAnonRequest = NSURLRequest(URL: genAnonUrl!)
+            
+            NSURLConnection.sendAsynchronousRequest(genAnonRequest, queue: NSOperationQueue.mainQueue(), completionHandler: {(response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
+                if error == nil {
+                    let json = JSON(data: data!)
+                    if let authID = json["ID"].string {
+                        
+                   // println("\(authID)") <- So you can make sure your getting the right thing back.
+                        
+         // After getting an authID back, it is saved in NSUserDefaults for
+                    let anonID = NSUserDefaults.standardUserDefaults()
+                    anonID.setObject(authID, forKey: "anonID")
+                    
+                        
+         // This is where the subscribe process takes place.
+                    let subscribeUrl = NSURL(string: "http://www.yourbackendserver.com:createSub?Email=\(authID)&PlanID=2&Salt=\(authID)&auth_type=local")
+                    let subscribeRequest = NSURLRequest(URL: subscribeUrl!)
+                   // println("\(subscribeUrl)")
+                    
+                        if let subscribeSuccess = json["result"].string {
+                           // println("\(subscribeSuccess)")
+        
+                
+                        }
+                    
+                    } else {
+                        //println("Error: \(error.localizedDescription)")
+                    }
+                }
+                else {
+                    //println("Error: \(error.localizedDescription)")
+                }
+            })
+            
+            
+            // This currently sends the user to my FirstTime blank screen if it's their first time loading app.
+            self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
+            
+            var storyboard = UIStoryboard(name: "Main", bundle: nil)
+            
+            var initialViewController = storyboard.instantiateViewControllerWithIdentifier("YourInitialViewController") as! UIViewController
+            
+            self.window?.rootViewController = initialViewController
+            self.window?.makeKeyAndVisible()
+            
+       // Create "HasLaunchedOnce" in NSUserDefaults for future app loads being sent to FeedViewController.
+            
+            NSUserDefaults.standardUserDefaults().setBool(true, forKey: "HasLaunchedOnce")
+        }
+        
+        return true
+    }
+
+    func applicationWillResignActive(application: UIApplication) {
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    }
+
+    func applicationDidEnterBackground(application: UIApplication) {
+        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    }
+
+    func applicationWillEnterForeground(application: UIApplication) {
+        // Forces a particular viewController to show when user brings app back from background.
+        
+        self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
+        
+        var storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        var initialViewController = storyboard.instantiateViewControllerWithIdentifier("MainFeed") as! UIViewController
+        
+        self.window?.rootViewController = initialViewController
+        self.window?.makeKeyAndVisible()
+        
+        
+        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    }
+
+    func applicationDidBecomeActive(application: UIApplication) {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    }
+
+    func applicationWillTerminate(application: UIApplication) {
+        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+
+}
