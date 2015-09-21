@@ -25,12 +25,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let genAnonUrl = NSURL(string: "http://www.yourbackendserver.com:genAnon")
             let genAnonRequest = NSURLRequest(URL: genAnonUrl!)
             
-            NSURLConnection.sendAsynchronousRequest(genAnonRequest, queue: NSOperationQueue.mainQueue(), completionHandler: {(response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
+            NSURLConnection.sendAsynchronousRequest(genAnonRequest, queue: NSOperationQueue.mainQueue(), completionHandler: {(response: NSURLResponse?, data: NSData?, error: NSError?) -> Void in
                 if error == nil {
                     let json = JSON(data: data!)
                     if let authID = json["ID"].string {
                         
-                   // println("\(authID)") <- So you can make sure your getting the right thing back.
+                   // print("\(authID)") <- So you can make sure your getting the right thing back.
                         
          // After getting an authID back, it is saved in NSUserDefaults for
                     let anonID = NSUserDefaults.standardUserDefaults()
@@ -39,21 +39,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         
          // This is where the subscribe process takes place.
                     let subscribeUrl = NSURL(string: "http://www.yourbackendserver.com:createSub?Email=\(authID)&PlanID=2&Salt=\(authID)&auth_type=local")
-                    let subscribeRequest = NSURLRequest(URL: subscribeUrl!)
-                   // println("\(subscribeUrl)")
+                    _ = NSURLRequest(URL: subscribeUrl!)
+                   // print("\(subscribeUrl)")
                     
-                        if let subscribeSuccess = json["result"].string {
-                           // println("\(subscribeSuccess)")
+                        if let _ = json["result"].string {
+                           // print("\(subscribeSuccess)")
         
                 
                         }
                     
                     } else {
-                        //println("Error: \(error.localizedDescription)")
+                        //print("Error: \(error.localizedDescription)")
                     }
                 }
                 else {
-                    //println("Error: \(error.localizedDescription)")
+                    //print("Error: \(error.localizedDescription)")
                 }
             })
             
@@ -61,9 +61,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // This currently sends the user to my FirstTime blank screen if it's their first time loading app.
             self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
             
-            var storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
             
-            var initialViewController = storyboard.instantiateViewControllerWithIdentifier("YourInitialViewController") as! UIViewController
+            let initialViewController = storyboard.instantiateViewControllerWithIdentifier("YourInitialViewController") as UIViewController
             
             self.window?.rootViewController = initialViewController
             self.window?.makeKeyAndVisible()
